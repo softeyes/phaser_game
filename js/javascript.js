@@ -1,62 +1,69 @@
-    console.log('loaded');
+console.log('loaded');
 
-    $(document).ready(setup);
-    
-    //initial setup
-    function setup() {
-        var stage = setCanvas();
-        var stageWidth = document.getElementById("gameCanvas").width;
-        var stageHeight = document.getElementById("gameCanvas").height;
-        setShape(stage, stageWidth, stageHeight);
-        setInterval(drawShape(stage), 20);
+    var canvas = document.getElementById("gameCanvas");
+    var ctx = canvas.getContext("2d");
+    var x = canvas.width / 2;
+    var y = canvas.height / 2;
+    var dx = 2;
+    var dy = -2;
+    var ballRadius = 10;
+    var paddleHeight = 10;
+    var paddleWidth = 75;
+    var paddleX = (canvas.width - paddleWidth) / 2;
+    var moveLeft = false;
+    var moveRight = false;
+
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
     }
 
-    //builds canvas, returns context
-    function setCanvas() {
-        console.log('inside setCanvas');
-        var canvas = document.getElementById("gameCanvas");
-        var ctx = canvas.getContext("2d");
-        return ctx;
+    function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
     }
 
-    function setShape(stage, stageWidth, stageHeight) {
-        var shapeX = stageWidth / 2;
-        var shapeY = stageHeight / 2;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBall();
+        x += dx;
+        y += dy;
 
-        stage.beginPath();
-        stage.arc(shapeX, shapeY, 10, 0, Math.PI * 2);
-        stage.fillStyle = "#0095DD";
-        stage.fill();
-        stage.closePath();
-
+        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+            dx = -dx;
+        }
+        if (y + dy > canvas.height - ballRadius || y + dy < ballRadius) {
+            dy = -dy;
+        }
+        if (rightPressed) {
+            paddleX += 7;
+        } else if (leftPressed) {
+            paddleX -= 7;
+        }
     }
-    //draws and sets position of object
-    function drawShape(stage) {
-        // console.log('inside drawShape');
-        // console.log(stage);
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
 
-        var shapeX = stageWidth / 2;
-        var shapeY = stageHeight / 2;
-
-        stage.beginPath();
-        stage.arc(shapeX, shapeY, 10, 0, Math.PI * 2);
-        stage.fillStyle = "#0095DD";
-        stage.fill();
-        stage.closePath();
-
-        //we want to add a small value to x and y after every frame has been 
-        //drawn to make it appear that the ball is moving. Let's define these 
-        //small values as dx and dy and set their values to 2 and -2 respectively. 
-        var dx = 2;
-        var dy = -2;
-
-        //update x and y with our dx and dy variable on every frame, so the ball 
-        //will be painted in the new position on every update.
-        shapeX += dx;
-        shapeY += dy;
+    function keyDownHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = true;
+        } else if (e.keyCode == 37) {
+            leftPressed = true;
+        }
     }
 
-    // setInterval() is a JS timing function that has an infinite nature. 
-    // The draw() function will be called every 10 milliseconds forever, 
-    // or until we stop it.
-    // setInterval(drawShape, 10);
+    function keyUpHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = false;
+        } else if (e.keyCode == 37) {
+            leftPressed = false;
+        }
+    }
+
+    setInterval(draw, 10);
